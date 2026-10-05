@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>إدارة الطلاب</title>
+<link rel="manifest" href="manifest.webmanifest">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="إدارة الطلاب">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--tx:#1d2433;--mu:#6b7385;--pr:#0f766e;--prt:#fff;--bd:#e4e0d6;--ok:#15803d;--okb:#dcfce7;--bad:#b91c1c;--badb:#fee2e2;--wn:#a16207;--wnb:#fef3c7;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161d;--card:#1b212b;--tx:#eef0f4;--mu:#98a1b3;--pr:#2dd4bf;--prt:#052e2b;--bd:#2b3340;--ok:#4ade80;--okb:#14351f;--bad:#f87171;--badb:#3b1818;--wn:#fbbf24;--wnb:#3a2d0c}}
+:root[data-theme="dark"]{--bg:#12161d;--card:#1b212b;--tx:#eef0f4;--mu:#98a1b3;--pr:#2dd4bf;--prt:#052e2b;--bd:#2b3340;--ok:#4ade80;--okb:#14351f;--bad:#f87171;--badb:#3b1818;--wn:#fbbf24;--wnb:#3a2d0c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Cairo,Tahoma,system-ui,sans-serif;padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--pr);color:var(--prt);padding:10px 14px;display:flex;gap:10px;align-items:center}
+header h1{font-size:18px;margin:0;white-space:nowrap}
+#q{flex:1;min-width:0;border:0;border-radius:10px;padding:9px 12px;font:inherit;background:rgba(255,255,255,.92);color:#1d2433}
+#sr{position:fixed;inset-inline:10px;top:calc(56px + env(safe-area-inset-top,0px));z-index:6;background:var(--card);border:1px solid var(--bd);border-radius:12px;max-height:60vh;overflow:auto;display:none;box-shadow:0 8px 30px #0003}
+main{max-width:none;margin:0;padding:12px}
+h2{font-size:17px;margin:14px 0 8px}
+h3{margin:0 0 10px}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px}
+.k{font-size:24px;font-weight:700}.k small,small{color:var(--mu);font-weight:400;font-size:12px;display:block}
+.r{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin:6px 0;display:flex;justify-content:space-between;gap:8px;align-items:center;cursor:pointer;flex-wrap:wrap}
+.r.n{cursor:default}
+.tags{display:flex;gap:5px;flex-wrap:wrap}
+.b{font-size:12px;padding:3px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--bd);color:var(--mu)}
+.b.ok{background:var(--okb);color:var(--ok);border-color:transparent}.b.no{background:var(--badb);color:var(--bad);border-color:transparent}.b.wn{background:var(--wnb);color:var(--wn);border-color:transparent}
+button,.btn{font:inherit;border:0;border-radius:10px;padding:8px 14px;background:var(--pr);color:var(--prt);cursor:pointer;font-weight:600}
+button.s{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}button.d{background:var(--bad);color:#fff}button.sm{padding:5px 10px;font-size:13px}
+input,select,textarea{font:inherit;width:100%;padding:9px 10px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
+label{display:block;margin:8px 0;font-size:13px;color:var(--mu)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}.bar>*{width:auto;flex:0 1 auto}.bar input,.bar select{flex:1 1 120px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:4px 0}.chips button{white-space:nowrap}
+.chips button.on{background:var(--pr);color:var(--prt)}.chips button:not(.on){background:var(--card);color:var(--tx);border:1px solid var(--bd)}
+nav{position:fixed;bottom:0;inset-inline:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;background:none;color:var(--mu);border-radius:0;padding:10px 2px;font-size:12px}nav button.on{color:var(--pr)}nav button span{display:block;font-size:18px}
+#m{position:fixed;inset:0;background:#0007;z-index:10;display:none;align-items:flex-end;justify-content:center}
+#m>div{background:var(--card);width:100%;max-width:560px;max-height:90vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px calc(16px) calc(16px + env(safe-area-inset-bottom,0px))}
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.mg button{padding:8px 4px;font-size:13px}
+.at{display:flex;gap:4px}.at button{padding:6px 10px;font-size:13px}
+.at button:not(.on){background:var(--bg);color:var(--mu);border:1px solid var(--bd)}.at .p.on{background:var(--ok);color:#fff}.at .a.on{background:var(--bad);color:#fff}.at .l.on{background:var(--wn);color:#fff}
+#t{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1d2433;color:#fff;padding:9px 16px;border-radius:99px;z-index:20;display:none;font-size:14px}
+.em{text-align:center;color:var(--mu);padding:24px}
+#au{position:fixed;inset:0;background:var(--bg);z-index:30;display:none;align-items:center;justify-content:center;padding:16px}#au>div{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:20px;width:100%;max-width:380px}
+</style>
+</head>
+<body>
+<header><h1 id="tn" onclick="nameM()" style="cursor:pointer" title="اضغط لتغيير الاسم">🎓 إدارة الطلاب</h1><input id="q" placeholder="ابحث عن طالب بالاسم أو الرقم..." oninput="srch()" autocomplete="off"><button class="s sm" onclick="dk()" style="padding:6px 10px">🌙</button><button class="s sm" onclick="fs()" style="padding:6px 10px">⛶</button></header>
+<div id="sr"></div>
+<main id="app"></main>
+<nav id="nav"></nav>
+<div id="m" onclick="if(event.target==this)cl()"><div id="mc"></div></div>
+<div id="au"></div>
+<div id="t"></div>
+<script>
+const G=['أولى ابتدائي','ثانية ابتدائي','ثالثة ابتدائي','رابعة ابتدائي','خامسة ابتدائي','سادسة ابتدائي','أولى إعدادي','ثانية إعدادي','ثالثة إعدادي','أولى ثانوي','ثانية ثانوي','ثالثة ثانوي'];
+const M=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const COLS=['students','payments','attendance','exams','settings'];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s||'').replace(/[\u064B-\u065F]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').toLowerCase().trim();
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const pad=n=>String(n).padStart(2,'0');
+const D=new Date();const TODAY=`${D.getFullYear()}-${pad(D.getMonth()+1)}-${D.getDate()<10?'0':''}${D.getDate()}`;
+let S={students:{},payments:{},attendance:{},exams:{},settings:{}},sb=null,UID=null,LS='mister_islam_cloud_';
+const AYs=d=>{const y=+String(d).slice(0,4),m=+String(d).slice(5,7)-1;return m>=7?y:y-1};const ORD=[7,8,9,10,11,0,1,2,3,4,5,6],cy=(a,m)=>m>=7?a:a+1,ayl=a=>`${a}/${a+1}`,ayOpts=sel=>[...Array(5)].map((_,i)=>AYs(TODAY)-3+i).map(a=>`<option value="${a}" ${a==sel?'selected':''}>${ayl(a)}</option>`).join('');
+let V='home',gSel=0,sort='name',lq='',pG='all',pM=D.getMonth(),pA=AYs(TODAY),pF='all',aG=0,aD=TODAY,fA=AYs(TODAY),_cb=null,_back=null;
+function toast(t){const e=$('#t');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2200)}
+const CFG=window.MI_CONFIG||{};
+function cache(){try{localStorage.setItem(LS+UID,JSON.stringify(S))}catch(e){}}
+function save(col,id,obj){
+  if(obj===null)delete S[col][id];else S[col][id]=obj;
+  cache();if(!sb||!UID)return;
+  const q=obj===null?sb.from('docs').delete().eq('col',col).eq('id',id):sb.from('docs').upsert({user_id:UID,col,id,data:obj},{onConflict:'user_id,col,id'});
+  q.then(x=>{if(x.error){toast('تعذر الحفظ على السيرفر');console.error(x.error)}},()=>toast('لا يوجد اتصال، التعديل لم يُحفظ'));
+}
+async function loadAll(){const out={students:{},payments:{},attendance:{},exams:{},settings:{}};let from=0;
+  while(true){const {data,error}=await sb.from('docs').select('col,id,data').order('col').order('id').range(from,from+999);if(error)throw error;data.forEach(x=>{(out[x.col]=out[x.col]||{})[x.id]=x.data});if(data.length<1000)break;from+=1000}
+  return out}
+function authUI(msg){const a=$('#au');a.style.display='flex';a.innerHTML=`<div><h2 style="margin-top:0">🎓 إدارة الطلاب</h2><label>البريد الإلكتروني<input id="a_e" type="email" autocomplete="email" dir="ltr"></label><label>كلمة المرور (6 أحرف أو أكثر)<input id="a_p" type="password" autocomplete="current-password" dir="ltr"></label><div id="a_m" style="color:var(--bad);min-height:22px;font-size:13px">${msg||''}</div><div class="bar"><button onclick="doAuth(0)">دخول</button><button class="s" onclick="doAuth(1)">إنشاء حساب جديد</button></div></div>`}
+async function doAuth(up){const email=$('#a_e').value.trim(),password=$('#a_p').value,m=$('#a_m');
+  if(!email||password.length<6){m.textContent='اكتب البريد وكلمة مرور من 6 أحرف على الأقل';return}
+  m.style.color='var(--mu)';m.textContent='جارٍ المعالجة...';
+  let r;try{r=up?await sb.auth.signUp({email,password}):await sb.auth.signInWithPassword({email,password})}catch(e){m.style.color='var(--bad)';m.textContent='تعذر الاتصال بالسيرفر';return}
+  if(r.error){m.style.color='var(--bad)';m.textContent=({'Invalid login credentials':'البريد أو كلمة المرور غير صحيحة','User already registered':'هذا البريد مسجل بالفعل، اضغط دخول','Email not confirmed':'لم يتم تأكيد البريد بعد'})[r.error.message]||r.error.message;return}
+  if(!r.data.session){m.style.color='var(--ok)';m.textContent='تم إنشاء الحساب. افتح رسالة التأكيد في بريدك ثم اضغط دخول';return}
+  UID=r.data.session.user.id;enter()}
+async function enter(){$('#au').style.display='none';let ch=null;try{ch=JSON.parse(localStorage.getItem(LS+UID)||'null')}catch(e){}
+  try{S=await loadAll();cache()}catch(e){if(ch)S=Object.assign(S,ch);toast('تعذر الاتصال، تُعرض بيانات محفوظة على الجهاز')}
+  render();applyTN();if(!TN())nameM()}
+async function boot(){const a=$('#au');
+  if(!CFG.url||!CFG.key||CFG.url.includes('PASTE')||!window.supabase){a.style.display='flex';a.innerHTML='<div><h3>الموقع غير مُعدّ بعد</h3><p>افتح ملف config.js وضع رابط مشروع Supabase والمفتاح العام.</p></div>';return}
+  sb=supabase.createClient(CFG.url,CFG.key);let ses=null;try{ses=(await sb.auth.getSession()).data.session}catch(e){}
+  if(ses){UID=ses.user.id;enter()}else authUI()}
+async function logout(){try{await sb.auth.signOut()}catch(e){}location.reload()}
+const A=()=>Object.entries(S.students).map(([id,s])=>({id,...s}));
+const byG=g=>A().filter(s=>s.grade==g);
+const feeOf=s=>(s.fee!==undefined&&s.fee!==null&&s.fee!=='')?+s.fee:fee(s.grade);
+const fee=g=>+(((S.settings.main||{}).fee||{})[g])||0;
+const pay=(sid,y,m)=>S.payments[`${sid}_${y}-${m}`];
+const att=sid=>Object.values(S.attendance).filter(a=>a.sid==sid&&AYs(a.date)==AYs(TODAY));
+const absN=sid=>att(sid).filter(a=>a.st=='a').length;
+const exOf=g=>Object.entries(S.exams).map(([id,e])=>({id,...e})).filter(e=>e.grade==g&&AYs(e.date)==AYs(TODAY));
+function lastEx(s){const l=exOf(s.grade).filter(e=>e.scores&&e.scores[s.id]!=null).sort((a,b)=>b.date.localeCompare(a.date))[0];return l?{t:l.title,sc:l.scores[s.id],max:l.max}:null}
+function opts(arr,sel){return arr.map((x,i)=>`<option value="${i}" ${i==sel?'selected':''}>${x}</option>`).join('')}
+function openM(h){$('#mc').innerHTML=h;$('#m').style.display='flex'}
+function cl(){$('#m').style.display='none'}
+function cfm(msg,fn){_cb=fn;openM(`<h3>تأكيد</h3><p>${msg}</p><div class="bar"><button class="d" onclick="cl();_cb()">نعم، تأكيد</button><button class="s" onclick="cl()">إلغاء</button></div>`)}
+// ---------- views
+function waLink(ph,msg){let n=String(ph||'').replace(/\D/g,'');if(!n)return '';if(n.startsWith('00'))n=n.slice(2);else if(n.startsWith('0'))n='20'+n.slice(1);return `https://wa.me/${n}?text=${encodeURIComponent(msg)}`}
+let aGr='all',sf='all',autoWa=(()=>{try{return localStorage.getItem('mi_auto')!=='0'}catch(e){return true}})(),_q=[],_qi=-1;
+function wa(sid,type,y,m,q){if(!q)_q=[];const s=S.students[sid];let t;
+ if(type=='pay')t=`السلام عليكم، ولي أمر الطالب/ة ${s.name}. نذكّركم بسداد اشتراك شهر ${M[m]} ${y} (${feeOf(s)} جنيه). ${TN()}`;
+ else if(type=='abs')t=`السلام عليكم، نفيدكم بأن الطالب/ة ${s.name} تغيّب/ت عن الحصة بتاريخ ${aD}. ${TN()}`;
+ else{const at=att(sid),le=lastEx(s),p=pay(sid,D.getFullYear(),D.getMonth());t=`تقرير الطالب/ة ${s.name} (${G[s.grade]}):\nالغياب: ${absN(sid)} | التأخير: ${at.filter(a=>a.st=='l').length}\n${le?`آخر امتحان (${le.t}): ${le.sc}/${le.max}\n`:''}اشتراك الشهر: ${p?'مدفوع':'غير مدفوع'}\n${TN()}`}
+ const u=waLink(s.phone,t);if(!u){toast('لا يوجد رقم لولي الأمر');return}window._ph=s.phone;
+ openM(`<h3>رسالة لولي أمر ${esc(s.name)}</h3><label>الرسالة (يمكنك تعديلها)<textarea id="wm" rows="6">${esc(t)}</textarea></label><div class="bar"><a class="btn" id="wal" href="${u}" target="_blank" rel="noopener" onclick="this.href=waLink(_ph,$('#wm').value)" style="text-decoration:none">فتح واتساب</a><button class="s" onclick="cpy()">نسخ الرسالة</button><a class="btn" href="tel:${esc(s.phone)}" style="text-decoration:none;background:var(--bg);color:var(--tx);border:1px solid var(--bd)">اتصال</a>${_q.length?`<button onclick="nextQ()">التالي ${_qi+1}/${_q.length} ⏭</button>`:''}<button class="s" onclick="cl()">إغلاق</button></div>`)}
+function absQ(){const l=aList().filter(s=>s.phone&&(S.attendance[`${s.id}_${aD}`]||{}).st=='a');if(!l.length){toast('لا يوجد غائبون لديهم رقم ولي أمر');return}_q=l.map(s=>s.id);_qi=0;wa(_q[0],'abs',0,0,1)}
+function nextQ(){_qi++;if(_qi>=_q.length){_q=[];cl();toast('تم إبلاغ كل الغائبين');return}wa(_q[_qi],'abs',0,0,1)}
+function dk(){const r=document.documentElement,d=getComputedStyle(r).getPropertyValue('--bg').trim()=='#12161d';r.dataset.theme=d?'light':'dark'}
+const grps=()=>S.settings.groups||{};
+const grpTag=s=>s.grp&&grps()[s.grp]?' · '+esc(grps()[s.grp].name):'';
+const aList=()=>byG(aG).filter(s=>aGr=='all'||s.grp==aGr);
+function grpOptHtml(g,sel){return '<option value="">بدون مجموعة</option>'+Object.entries(grps()).filter(([id,x])=>x.grade==g).map(([id,x])=>`<option value="${id}" ${id==sel?'selected':''}>${esc(x.name)}</option>`).join('')}
+function grpOpts(){$('#f_gr').innerHTML=grpOptHtml(+$('#f_g').value,'')}
+function grpM(){const l=Object.entries(grps()).filter(([id,x])=>x.grade==gSel);openM(`<h3>مجموعات ${G[gSel]}</h3>${l.length?l.map(([id,x])=>`<div class="r n"><div><b>${esc(x.name)}</b><small>${byG(gSel).filter(s=>s.grp==id).length} طالب</small></div><button class="sm d" onclick="delGrp('${id}')">حذف</button></div>`).join(''):'<div class="em">لا توجد مجموعات</div>'}<label>اسم مجموعة جديدة (مثال: سبت وثلاثاء 4م)<input id="g_n"></label><div class="bar"><button onclick="addGrp()">+ إضافة مجموعة</button><button class="s" onclick="cl()">إغلاق</button></div>`)}
+function addGrp(){const n=$('#g_n').value.trim();if(!n){toast('اكتب اسم المجموعة');return}const o={...grps()};o[uid()]={grade:gSel,name:n};save('settings','groups',o);grpM();render()}
+function delGrp(gid){cfm('حذف المجموعة؟ الطلاب يبقون في الصف بدون مجموعة.',()=>{const o={...grps()};delete o[gid];save('settings','groups',o);byG(gSel).filter(s=>s.grp==gid).forEach(({id:i,...x})=>save('students',i,{...x,grp:''}));render();toast('تم الحذف')})}
+function alertH(){const m=D.getMonth(),y=D.getFullYear(),first=new Date(y,m,1).getTime(),out=[];
+ A().forEach(s=>{const rc=att(s.id).sort((a,b)=>b.date.localeCompare(a.date));let n=0;for(const a of rc){if(a.st=='a')n++;else break}
+  if(n>=3)out.push({s,t:`غاب ${n} مرات متتالية`,c:'no'});
+  if(m!=7&&feeOf(s)>0&&(s.added||0)<first){const pm=m==0?11:m-1,py=m==0?y-1:y;if(!pay(s.id,y,m)&&!pay(s.id,py,pm))out.push({s,t:'لم يدفع منذ شهرين',c:'wn'})}});
+ return `<h2>🔔 تنبيهات</h2>${out.length?out.slice(0,15).map(x=>`<div class="r" onclick="fileM('${x.s.id}')"><div><b>${esc(x.s.name)}</b><small>${G[x.s.grade]}${grpTag(x.s)}</small></div><span class="b ${x.c}">${x.t}</span></div>`).join(''):'<div class="em">لا توجد تنبيهات</div>'}`}
+function repT(sid,m){const s=S.students[sid],y=cy(AYs(TODAY),m),ym=`${y}-${pad(m+1)}`;
+ const at=Object.values(S.attendance).filter(a=>a.sid==sid&&a.date.slice(0,7)==ym),c=x=>at.filter(a=>a.st==x).length;
+ const ab=at.filter(a=>a.st=='a').map(a=>a.date.slice(8)+'/'+a.date.slice(5,7)).sort();
+ const ex=Object.values(S.exams).filter(e=>e.grade==s.grade&&e.date.slice(0,7)==ym&&e.scores&&e.scores[sid]!=null);
+ const p=pay(sid,y,m);
+ return `تقرير الطالب/ة ${s.name} (${G[s.grade]})\nشهر ${M[m]} ${y}\n\nالحضور: حاضر ${c('p')} | غائب ${c('a')} | متأخر ${c('l')}${ab.length?'\nأيام الغياب: '+ab.join('، '):''}\n\nالامتحانات: ${ex.length?'\n'+ex.map(e=>`- ${e.title}: ${e.scores[sid]}/${e.max}`).join('\n'):'لا توجد امتحانات هذا الشهر'}\n\nالاشتراك: ${p?`مدفوع (${p.amt} جنيه)`:'غير مدفوع'}\n\n${TN()}`}
+function repM(sid,m){m=m==null?D.getMonth():m;const s=S.students[sid];window._ph=s.phone;
+ openM(`<h3>📄 تقرير شهري — ${esc(s.name)}</h3><label>الشهر<select onchange="$('#wm').value=repT('${sid}',+this.value)">${ORD.map(i=>`<option value="${i}" ${i==m?'selected':''}>${M[i]} ${cy(AYs(TODAY),i)}</option>`).join('')}</select></label><label>نص التقرير (يمكنك تعديله)<textarea id="wm" rows="11">${esc(repT(sid,m))}</textarea></label><div class="bar">${s.phone?`<a class="btn" href="#" target="_blank" rel="noopener" onclick="this.href=waLink(_ph,$('#wm').value)" style="text-decoration:none">إرسال لولي الأمر</a>`:'<small>لا يوجد رقم لولي الأمر</small>'}<button class="s" onclick="cpy()">نسخ</button><button class="s" onclick="cl();fileM('${sid}')">رجوع</button></div>`)}
+function bkM(d){openM(`<h3>نسخة احتياطية</h3><label>انسخ هذا النص واحفظه في ملاحظات هاتفك أو أرسله لنفسك<textarea id="bkt" rows="6" readonly>${esc(d)}</textarea></label><div class="bar"><button onclick="$('#bkt').select();document.execCommand('copy');toast('تم النسخ')">نسخ</button></div><label>للاستعادة: الصق النسخة هنا<textarea id="bki" rows="4"></textarea></label><div class="bar"><button class="s" onclick="impT()">استعادة</button><button class="s" onclick="cl()">إغلاق</button></div>`)}
+function impT(){try{const o=JSON.parse($('#bki').value);if(!o.students)throw 0;COLS.forEach(c=>Object.entries(o[c]||{}).forEach(([id,v])=>save(c,id,v)));cl();render();toast('تمت الاستعادة')}catch(e){toast('النص غير صالح')}}
+function fs(){const d=document,e=d.documentElement;try{const on=d.fullscreenElement||d.webkitFullscreenElement;let p;if(on)p=(d.exitFullscreen||d.webkitExitFullscreen).call(d);else p=(e.requestFullscreen||e.webkitRequestFullscreen).call(e);if(p&&p.catch)p.catch(()=>toast('المتصفح لا يسمح بملء الشاشة هنا'))}catch(x){toast('المتصفح لا يسمح بملء الشاشة هنا')}}
+const TN=()=>(S.settings.profile||{}).name||'';
+function applyTN(){$('#tn').textContent='🎓 '+(TN()||'إدارة الطلاب');document.title=TN()||'إدارة الطلاب'}
+function nameM(){openM(`<h3>اسم المدرس</h3><label>يظهر في أعلى الصفحة وفي رسائل أولياء الأمور<input id="tnm" value="${esc(TN())}" placeholder="مثال: مستر أحمد"></label><div class="bar"><button onclick="saveTN()">حفظ</button><button class="s" onclick="cl()">لاحقًا</button></div>`)}
+function saveTN(){const v=$('#tnm').value.trim();if(!v){toast('اكتب الاسم');return}save('settings','profile',{name:v});cl();applyTN()}
+const BK='exams';
+async function fBlob(f){const x=await sb.storage.from(BK).download(f.path);if(x.error)throw x.error;return x.data}
+function rmFiles(fl){const p=(fl||[]).map(f=>f.path);if(p.length&&sb)sb.storage.from(BK).remove(p).catch(()=>{})}
+function fileSec(id){const fl=S.exams[id].files||[];
+ return `<h2>📎 ملفات الامتحان (PDF)</h2>${fl.length?fl.map((f,i)=>`<div class="r n"><b style="word-break:break-all">📄 ${esc(f.name)}</b><div class="tags"><button class="sm" onclick="viewF('${id}',${i})">عرض</button><button class="sm s" onclick="dlF('${id}',${i})">تنزيل</button><button class="sm d" onclick="delF('${id}',${i})">حذف</button></div></div>`).join(''):'<small>لا توجد ملفات</small>'}<small id="us" style="display:block"></small><div class="bar"><input type="file" id="xf" accept="application/pdf,.pdf" multiple><button class="sm" onclick="upF('${id}')">رفع</button></div>`}
+async function upF(id){const files=[...$('#xf').files],us=$('#us');if(!files.length){us.textContent='اختر ملف PDF أولًا';return}
+ const list=[...(S.exams[id].files||[])];let ok=0;
+ for(const f of files){us.textContent='جارٍ رفع '+f.name+' ...';const path=`${UID}/${uid()}.pdf`;
+  try{const x=await sb.storage.from(BK).upload(path,f,{contentType:'application/pdf'});if(x.error)throw x.error;list.push({path,name:f.name,size:f.size});ok++}catch(e){us.style.color='var(--bad)';us.textContent='فشل رفع '+f.name+': '+(e&&e.message||e);if(ok)save('exams',id,{...S.exams[id],files:list});return}}
+ save('exams',id,{...S.exams[id],files:list});render();scM(id);toast('تم رفع '+ok+' ملف')}
+function delF(id,i){cfm('حذف هذا الملف نهائيًا؟',()=>{const e=S.exams[id],list=[...(e.files||[])],f=list.splice(i,1)[0];save('exams',id,{...e,files:list});rmFiles([f]);render();scM(id)})}
+async function dlF(id,i){const f=S.exams[id].files[i];try{const b=await fBlob(f),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=f.name;document.body.appendChild(a);a.click();a.remove();toast('تم التنزيل')}catch(e){toast('تعذر التنزيل')}}
+let _pj=null;
+function loadPdfJs(){if(_pj)return _pj;const B='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/',ld=u=>new Promise((ok,no)=>{const e=document.createElement('script');e.src=u;e.onload=ok;e.onerror=()=>no(new Error('تعذر تحميل مكتبة العرض'));document.head.appendChild(e)});
+ _pj=ld(B+'pdf.min.js').then(()=>ld(B+'pdf.worker.min.js')).then(()=>{pdfjsLib.GlobalWorkerOptions.workerSrc=B+'pdf.worker.min.js'}).catch(e=>{_pj=null;throw e});return _pj}
+async function viewF(id,i){const f=S.exams[id].files[i];
+ openM(`<h3>${esc(f.name)}</h3><div id="pv" style="max-height:62vh;overflow:auto;background:#777;border-radius:10px;padding:6px"><div class="em" style="color:#fff">جارٍ تحميل الملف...</div></div><div class="bar"><a class="btn" id="pvo" target="_blank" rel="noopener" style="text-decoration:none;display:none">فتح في تبويب جديد</a><button class="s" onclick="dlF('${id}',${i})">تنزيل</button><button class="s" onclick="scM('${id}')">رجوع</button></div>`);
+ const box=$('#pv');
+ try{const blob=await fBlob(f);const o=$('#pvo');o.href=URL.createObjectURL(blob);o.style.display='';await loadPdfJs();const pdf=await pdfjsLib.getDocument({data:await blob.arrayBuffer()}).promise;box.innerHTML='';
+  for(let p=1;p<=pdf.numPages;p++){const pg=await pdf.getPage(p),v0=pg.getViewport({scale:1}),sc=Math.min(3,(box.clientWidth-12)/v0.width*(window.devicePixelRatio||1)),vp=pg.getViewport({scale:sc}),cv=document.createElement('canvas');cv.width=vp.width;cv.height=vp.height;cv.style.cssText='width:100%;display:block;margin-bottom:6px;background:#fff';box.appendChild(cv);await pg.render({canvasContext:cv.getContext('2d'),viewport:vp}).promise}}
+ catch(e){box.innerHTML=`<div class="em" style="color:#fff">تعذر عرض الملف: ${esc(e&&e.message||e)}</div>`}}
+function cpy(){const e=$('#wm');e.select();let ok=false;try{ok=document.execCommand('copy')}catch(x){}if(!ok&&navigator.clipboard)navigator.clipboard.writeText(e.value).catch(()=>{});toast('تم نسخ الرسالة')}
+function chartH(){const ay=AYs(TODAY),v=ORD.map(i=>Object.values(S.payments).filter(p=>p.m==i&&p.y==cy(ay,i)).reduce((a,p)=>a+(+p.amt||0),0)),mx=Math.max(1,...v),tot=v.reduce((a,b)=>a+b,0);
+ return `<h2>التحصيل خلال العام ${ayl(ay)}</h2><div class="c"><div class="k">${tot} ج<small>إجمالي المحصّل هذا العام الدراسي</small></div><div style="display:flex;gap:4px;align-items:flex-end;margin-top:10px">${v.map((x,j)=>`<div style="flex:1;text-align:center;font-size:10px;color:var(--mu)">${x||''}<div style="background:var(--pr);height:${Math.round(x/mx*80)}px;border-radius:4px 4px 0 0;min-height:2px"></div>${M[ORD[j]].slice(0,3)}</div>`).join('')}</div></div>`}
+function rank(){const all=A();const sc=all.map(s=>{let t=0,n=0;exOf(s.grade).forEach(e=>{if(e.scores&&e.scores[s.id]!=null&&e.max>0){t+=e.scores[s.id]/e.max;n++}});return {s,v:n?Math.round(t/n*100):null}}).filter(x=>x.v!=null).sort((a,b)=>b.v-a.v);
+ const ab=all.map(s=>({s,v:absN(s.id)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v).slice(0,5);
+ const li=(l,u,cls)=>l.length?l.map(x=>`<div class="r" onclick="fileM('${x.s.id}')"><div><b>${esc(x.s.name)}</b><small>${G[x.s.grade]}</small></div><span class="b ${cls}">${x.v}${u}</span></div>`).join(''):'<div class="em">لا توجد بيانات</div>';
+ return `<h2>🏆 الأوائل</h2>${li(sc.slice(0,5),'%','ok')}<h2>⚠️ يحتاجون متابعة (درجات أقل من 50%)</h2>${li(sc.filter(x=>x.v<50).reverse().slice(0,5),'%','no')}<h2>الأكثر غيابًا</h2>${li(ab,' يوم','no')}`}
+function exStat(e){const v=Object.values(e.scores||{});if(!v.length)return '';const sum=v.reduce((a,b)=>a+b,0);return `<div class="tags" style="margin:8px 0"><span class="b">متوسط ${(sum/v.length).toFixed(1)}</span><span class="b ok">أعلى ${Math.max(...v)}</span><span class="b no">أقل ${Math.min(...v)}</span><span class="b">نجاح ${Math.round(v.filter(x=>x>=e.max/2).length/v.length*100)}%</span></div>`}
+async function bk(){const data=JSON.stringify(S);try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download='mister-islam-backup-'+TODAY+'.json';document.body.appendChild(a);a.click();a.remove();toast('تم تنزيل النسخة')}catch(e){bkM(data)}}
+function imp(inp){const f=inp.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);if(!o.students)throw 0;cfm('دمج بيانات النسخة مع البيانات الحالية؟',()=>{COLS.forEach(c=>Object.entries(o[c]||{}).forEach(([id,v])=>save(c,id,v)));render();toast('تم الاستيراد')})}catch(e){toast('ملف غير صالح')}inp.value=''};rd.readAsText(f)}
+function promo(){if(gSel>=11){toast('هذا آخر صف');return}const l=byG(gSel);if(!l.length){toast('لا يوجد طلاب');return}cfm(`نقل كل طلاب «${G[gSel]}» (${l.length}) إلى «${G[gSel+1]}»؟ تبقى مدفوعاتهم وغيابهم محفوظة.`,()=>{l.forEach(({id,...x})=>save('students',id,{...x,grade:gSel+1,grp:''}));toast('تمت الترقية');render()})}
+function row(s,y,m){const p=pay(s.id,y,m),le=lastEx(s);
+  return `<div class="r" onclick="fileM('${s.id}')"><div><b>${esc(s.name)}</b><small>${G[s.grade]}${grpTag(s)}${s.phone?' · '+esc(s.phone):''}</small></div><div class="tags"><span class="b ${p?'ok':'no'}">${p?'دفع':'لم يدفع'}</span><span class="b">غياب ${absN(s.id)}</span>${le?`<span class="b">${esc(le.t)}: ${le.sc}/${le.max}</span>`:''}</div></div>`}
+function home(){
+  const y=D.getFullYear(),m=D.getMonth(),all=A();let paid=0,col=0,late=0;
+  all.forEach(s=>{const p=pay(s.id,y,m);if(p){paid++;col+=+p.amt||0}else late+=feeOf(s)});
+  const abs=Object.values(S.attendance).filter(a=>a.st=='a'&&AYs(a.date)==AYs(TODAY)).length;
+  const lastS=all.sort((a,b)=>(b.added||0)-(a.added||0)).slice(0,5);
+  const lastP=Object.values(S.payments).sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,5);
+  const up=Object.entries(S.exams).map(([id,e])=>({id,...e})).filter(e=>e.date>=TODAY).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
+  const perf=g=>{let t=0,n=0;exOf(g).forEach(e=>Object.values(e.scores||{}).forEach(v=>{if(e.max>0){t+=v/e.max;n++}}));return n?Math.round(t/n*100):null};
+  let pt=0,pn=0;G.forEach((_,g)=>{exOf(g).forEach(e=>Object.values(e.scores||{}).forEach(v=>{if(e.max>0){pt+=v/e.max;pn++}}))});
+  return `${alertH()}<h2>${M[m]} ${y} · العام الدراسي ${ayl(AYs(TODAY))}</h2><div class="g">
+  <div class="c"><div class="k">${all.length}</div><small>إجمالي الطلاب</small></div>
+  <div class="c"><div class="k" style="color:var(--ok)">${paid}</div><small>دفعوا هذا الشهر</small></div>
+  <div class="c"><div class="k" style="color:var(--bad)">${all.length-paid}</div><small>لم يدفعوا</small></div>
+  <div class="c"><div class="k">${col}</div><small>المحصّل (ج)</small></div>
+  <div class="c"><div class="k" style="color:var(--bad)">${late}</div><small>المتأخر (ج)</small></div>
+  <div class="c"><div class="k">${abs}</div><small>إجمالي الغياب</small></div></div>
+  <h2>الطلاب في كل صف</h2><div class="g">${G.map((n,g)=>`<div class="c" onclick="gSel=${g};go('students')" style="cursor:pointer"><div class="k">${byG(g).length}</div><small>${n}</small></div>`).join('')}</div>
+  <h2>ملخص الأداء</h2><div class="c"><div class="k">${pn?Math.round(pt/pn*100)+'%':'—'}</div><small>متوسط الدرجات العام</small>${G.map((n,g)=>perf(g)!=null?`<div class="bar"><span>${n}</span><b>${perf(g)}%</b></div>`:'').join('')}</div>
+  ${chartH()}${rank()}<h2>الامتحانات القادمة</h2>${up.length?up.map(e=>`<div class="r n"><b>${esc(e.title)}</b><span class="b">${G[e.grade]} · ${e.date}</span></div>`).join(''):'<div class="em">لا توجد امتحانات قادمة</div>'}
+  <h2>آخر المدفوعات</h2>${lastP.length?lastP.map(p=>{const s=S.students[p.sid];return s?`<div class="r n"><div><b>${esc(s.name)}</b><small>${G[s.grade]} · ${M[p.m]} ${p.y}</small></div><span class="b ok">${p.amt} ج</span></div>`:''}).join(''):'<div class="em">لا توجد مدفوعات</div>'}
+  <h2>آخر الطلاب المضافين</h2>${lastS.length?lastS.map(s=>`<div class="r" onclick="fileM('${s.id}')"><b>${esc(s.name)}</b><span class="b">${G[s.grade]}</span></div>`).join(''):'<div class="em">لم تتم إضافة طلاب بعد</div>'}<h2>النسخ الاحتياطي</h2><div class="bar"><button class="s" onclick="bk()">⬇️ تصدير نسخة</button><button class="s" onclick="$('#imp').click()">⬆️ استيراد ملف</button><button class="s" onclick="logout()">🚪 تسجيل الخروج</button><input id="imp" type="file" accept=".json,.txt,application/json,text/plain" hidden onchange="imp(this)"></div>`}
+function students(){
+  let l=sList();
+  l.sort(sort=='name'?(a,b)=>a.name.localeCompare(b.name,'ar'):sort=='new'?(a,b)=>(b.added||0)-(a.added||0):(a,b)=>absN(b.id)-absN(a.id));
+  return `<div class="chips">${G.map((n,g)=>`<button class="${g==gSel?'on':''} sm" onclick="gSel=${g};lq='';render()">${n} (${byG(g).length})</button>`).join('')}</div>
+  <div class="bar"><input placeholder="بحث داخل الصف" value="${esc(lq)}" oninput="lq=this.value;listOnly()"><select onchange="sort=this.value;render()"><option value="name" ${sort=='name'?'selected':''}>ترتيب بالاسم</option><option value="new" ${sort=='new'?'selected':''}>الأحدث أولًا</option><option value="abs" ${sort=='abs'?'selected':''}>الأكثر غيابًا</option></select><select onchange="sf=this.value;render()"><option value="all">كل الطلاب</option><option value="unpaid" ${sf=='unpaid'?'selected':''}>لم يدفعوا هذا الشهر</option><option value="abs" ${sf=='abs'?'selected':''}>عليهم غياب</option></select><button class="s" onclick="grpM()">👥 المجموعات</button><button onclick="sForm()">+ إضافة طالب</button><button class="s" onclick="promo()">⬆️ ترقية الصف</button></div>
+  <div id="sl">${slist(l)}</div>`}
+function slist(l){return l.length?l.map(s=>row(s,D.getFullYear(),D.getMonth())).join(''):'<div class="em">لا يوجد طلاب في هذا الصف</div>'}
+function sList(){let l=byG(gSel);if(lq)l=l.filter(s=>norm(s.name).includes(norm(lq))||(s.phone||'').includes(lq));if(sf=='unpaid')l=l.filter(s=>!pay(s.id,D.getFullYear(),D.getMonth()));if(sf=='abs')l=l.filter(s=>absN(s.id)>0);return l}
+function listOnly(){$('#sl').innerHTML=slist(sList())}
+function payments(){
+  const pY=cy(pA,pM);let l=pG=='all'?A():byG(pG);l.sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+  let paid=0,col=0,late=0;l.forEach(s=>{const p=pay(s.id,pY,pM);if(p){paid++;col+=+p.amt||0}else late+=feeOf(s)});
+  if(pF=='paid')l=l.filter(s=>pay(s.id,pY,pM));if(pF=='unpaid')l=l.filter(s=>!pay(s.id,pY,pM));
+  return `<div class="bar"><select onchange="pG=this.value;render()"><option value="all">كل الصفوف</option>${G.map((n,g)=>`<option value="${g}" ${pG==g?'selected':''}>${n}</option>`).join('')}</select><select onchange="pA=+this.value;render()">${ayOpts(pA)}</select><select onchange="pM=+this.value;render()">${ORD.map(i=>`<option value="${i}" ${i==pM?'selected':''}>${M[i]}</option>`).join('')}</select></div>
+  <div class="bar"><select onchange="pF=this.value;render()"><option value="all">الكل</option><option value="paid" ${pF=='paid'?'selected':''}>الدافعون</option><option value="unpaid" ${pF=='unpaid'?'selected':''}>المتأخرون</option></select><button class="s" onclick="feeM()">قيمة الاشتراك الشهري</button></div>
+  <div class="g"><div class="c"><div class="k" style="color:var(--ok)">${paid}</div><small>دفعوا</small></div><div class="c"><div class="k" style="color:var(--bad)">${(pG=='all'?A().length:byG(pG).length)-paid}</div><small>لم يدفعوا</small></div><div class="c"><div class="k">${col}</div><small>المحصّل (ج)</small></div><div class="c"><div class="k" style="color:var(--bad)">${late}</div><small>المتأخر (ج)</small></div></div>
+  <h2>${M[pM]} ${pY}</h2>${l.length?l.map(s=>{const p=pay(s.id,pY,pM);return `<div class="r n"><div onclick="fileM('${s.id}')" style="cursor:pointer"><b>${esc(s.name)}</b><small>${G[s.grade]}${p?` · ${p.amt} ج · ${p.date}`:` · المطلوب ${feeOf(s)} ج`}</small></div><div class="tags">${p?`<button class="sm s" onclick="payM('${s.id}',${pY},${pM})">تعديل</button><button class="sm d" onclick="unpay('${s.id}',${pY},${pM})">إلغاء</button>`:`<span class="b no">لم يدفع</span><button class="sm" onclick="payM('${s.id}',${pY},${pM})">تسجيل دفع</button>`}</div></div>`}).join(''):'<div class="em">لا يوجد طلاب</div>'}`}
+function attendance(){
+  const l=aList().sort((a,b)=>a.name.localeCompare(b.name,'ar'));let c={p:0,a:0,l:0};
+  l.forEach(s=>{const a=S.attendance[`${s.id}_${aD}`];if(a)c[a.st]++});
+  return `<div class="bar"><select onchange="aG=+this.value;aGr='all';render()">${opts(G,aG)}</select><select onchange="aGr=this.value;render()"><option value="all">كل المجموعات</option>${Object.entries(grps()).filter(([id,x])=>x.grade==aG).map(([id,x])=>`<option value="${id}" ${aGr==id?'selected':''}>${esc(x.name)}</option>`).join('')}</select><input type="date" value="${aD}" onchange="aD=this.value||TODAY;render()"></div>
+  <div class="g"><div class="c"><div class="k" style="color:var(--ok)">${c.p}</div><small>حاضر</small></div><div class="c"><div class="k" style="color:var(--bad)">${c.a}</div><small>غائب</small></div><div class="c"><div class="k" style="color:var(--wn)">${c.l}</div><small>متأخر</small></div></div>
+  <div class="bar"><button class="s sm" onclick="allP()">تحديد الكل حاضر</button><button class="sm" onclick="absQ()">📲 إبلاغ كل الغائبين (${c.a})</button><label style="margin:0;display:flex;gap:6px;align-items:center"><input type="checkbox" style="width:auto" ${autoWa?'checked':''} onchange="autoWa=this.checked;try{localStorage.setItem('mi_auto',autoWa?'1':'0')}catch(e){}"> فتح رسالة الغياب تلقائيًا</label></div>
+  ${l.length?l.map(s=>{const a=(S.attendance[`${s.id}_${aD}`]||{}).st;return `<div class="r n"><div onclick="fileM('${s.id}')" style="cursor:pointer"><b>${esc(s.name)}</b><small>غياب ${absN(s.id)}${grpTag(s)}</small></div><div class="at"><button class="p ${a=='p'?'on':''}" onclick="mark('${s.id}','p')">حاضر</button><button class="a ${a=='a'?'on':''}" onclick="mark('${s.id}','a')">غائب</button><button class="l ${a=='l'?'on':''}" onclick="mark('${s.id}','l')">متأخر</button></div>${a=='a'&&s.phone?`<button class="sm s" onclick="wa('${s.id}','abs')">📲 إبلاغ</button>`:''}</div>`}).join(''):'<div class="em">لا يوجد طلاب في هذا الصف</div>'}`}
+function exams(){
+  const l=Object.entries(S.exams).map(([id,e])=>({id,...e})).sort((a,b)=>b.date.localeCompare(a.date));
+  return `<div class="bar"><button onclick="exForm()">+ إضافة امتحان</button></div>${l.length?l.map(e=>{const n=Object.keys(e.scores||{}).length;return `<div class="r" onclick="scM('${e.id}')"><div><b>${esc(e.title)}</b><small>${G[e.grade]} · ${e.date} · الدرجة النهائية ${e.max}</small></div><span class="tags"><span class="b ${n?'ok':''}">${n?n+' درجة':'بدون درجات'}</span>${(e.files||[]).length?`<span class="b">📎 ${e.files.length}</span>`:''}</span></div>`}).join(''):'<div class="em">لا توجد امتحانات</div>'}`}
+const views={home,students,payments,attendance,exams};
+const NAV=[['home','🏠','الرئيسية'],['students','👥','الطلاب'],['payments','💰','المدفوعات'],['attendance','📋','الحضور'],['exams','📝','الامتحانات']];
+function render(){$('#app').innerHTML=views[V]();$('#nav').innerHTML=NAV.map(n=>`<button class="${n[0]==V?'on':''}" onclick="go('${n[0]}')"><span>${n[1]}</span>${n[2]}</button>`).join('')}
+function go(v){V=v;render();scrollTo(0,0)}
+// ---------- search
+function srch(){const raw=$('#q').value,q=norm(raw),box=$('#sr');if(!q){box.style.display='none';return}
+  const y=D.getFullYear(),m=D.getMonth();
+  const l=A().filter(s=>norm(s.name).includes(q)||(s.phone||'').includes(raw.trim())).sort((a,b)=>a.name.localeCompare(b.name,'ar')||a.grade-b.grade);
+  box.innerHTML=l.length?`<small style="padding:8px 12px">${l.length} نتيجة</small>`+l.map(s=>{const p=pay(s.id,y,m),le=lastEx(s),at=att(s.id),pn=ORD.filter(i=>pay(s.id,cy(AYs(TODAY),i),i)).length;
+    return `<div class="r" style="display:block" onclick="pick('${s.id}')"><b>${esc(s.name)} — ${G[s.grade]}</b><div class="tags" style="margin-top:6px"><span class="b ${p?'ok':'no'}">${M[m]}: ${p?'دفع '+p.amt+' ج':'لم يدفع'}</span><span class="b">دفع ${pn}/12 شهر</span><span class="b no">غياب ${absN(s.id)}</span><span class="b wn">تأخر ${at.filter(a=>a.st=='l').length}</span><span class="b">${le?esc(le.t)+': '+le.sc+'/'+le.max:'لا امتحانات'}</span></div>${s.phone?`<small>📞 ${esc(s.phone)}</small>`:''}${s.notes?`<small>📝 ${esc(s.notes)}</small>`:''}</div>`}).join(''):'<div class="em">لا توجد نتائج</div>';box.style.display='block'}
+function pick(id){$('#sr').style.display='none';$('#q').value='';fileM(id)}
+// ---------- students
+function sForm(id){const s=id?S.students[id]:{grade:gSel};
+  openM(`<h3>${id?'تعديل بيانات الطالب':'إضافة طالب'}</h3><label>اسم الطالب<input id="f_n" value="${esc(s.name)}"></label><label>الصف<select id="f_g" onchange="grpOpts()">${opts(G,s.grade)}</select></label><label>المجموعة<select id="f_gr">${grpOptHtml(s.grade,s.grp)}</select></label><label>رقم ولي الأمر<input id="f_p" type="tel" value="${esc(s.phone)}"></label><label>اشتراك خاص بالجنيه (فارغ = الاشتراك العادي، 0 = معفى)<input id="f_f" type="number" min="0" value="${s.fee??''}"></label><label>ملاحظات<textarea id="f_t" rows="3">${esc(s.notes)}</textarea></label><div class="bar"><button onclick="saveS('${id||''}')">حفظ</button><button class="s" onclick="cl()">إلغاء</button></div>`)}
+function saveS(id){const n=$('#f_n').value.trim();if(!n){toast('اكتب اسم الطالب');return}
+  const old=id?S.students[id]:null;
+  save('students',id||uid(),{name:n,grade:+$('#f_g').value,phone:$('#f_p').value.trim(),notes:$('#f_t').value.trim(),fee:$('#f_f').value===''?'':+$('#f_f').value,grp:$('#f_gr').value,added:old?old.added:Date.now()});
+  cl();render();toast('تم الحفظ')}
+function delS(id){const s=S.students[id];cfm(`هل تريد حذف الطالب «${esc(s.name)}» (${G[s.grade]}) نهائيًا مع كل مدفوعاته وغيابه ودرجاته؟`,()=>{
+  Object.keys(S.payments).filter(k=>S.payments[k].sid==id).forEach(k=>save('payments',k,null));
+  Object.keys(S.attendance).filter(k=>S.attendance[k].sid==id).forEach(k=>save('attendance',k,null));
+  Object.entries(S.exams).forEach(([k,e])=>{if(e.scores&&e.scores[id]!=null){const c={...e,scores:{...e.scores}};delete c.scores[id];save('exams',k,c)}});
+  save('students',id,null);render();toast('تم الحذف')})}
+function fileM(id){const s=S.students[id];if(!s)return;const at=att(id),c=x=>at.filter(a=>a.st==x).length;
+  const ex=exOf(s.grade).sort((a,b)=>b.date.localeCompare(a.date));
+  openM(`<h3>${esc(s.name)}</h3><div class="tags"><span class="b">${G[s.grade]}</span><span class="b">أُضيف ${new Date(s.added||Date.now()).toLocaleDateString('ar-EG')}</span></div>
+  ${s.phone?`<p>ولي الأمر: <a href="tel:${esc(s.phone)}">${esc(s.phone)}</a></p>`:''}${s.notes?`<p>${esc(s.notes)}</p>`:''}
+  <div class="bar"><button class="sm s" onclick="sForm('${id}')">تعديل</button><button class="sm d" onclick="delS('${id}')">حذف</button><button class="sm" onclick="repM('${id}')">📄 تقرير شهري</button><button class="sm s" onclick="cl()">إغلاق</button></div>
+  <h2>المدفوعات <select style="width:auto;display:inline" onchange="fA=+this.value;fileM('${id}')">${ayOpts(fA)}</select></h2>
+  <div class="mg">${ORD.map(m=>{const n=M[m],y=cy(fA,m),p=pay(id,y,m);return `<button class="${p?'':'s'}" style="${p?'background:var(--ok);color:#fff':''}" onclick="_back='${id}';payM('${id}',${y},${m})">${n}${p?'<br>'+p.amt:''}</button>`}).join('')}</div>
+  <h2>الحضور</h2><div class="tags"><span class="b ok">حاضر ${c('p')}</span><span class="b no">غائب ${c('a')}</span><span class="b wn">متأخر ${c('l')}</span><span class="b">نسبة الحضور ${at.length?Math.round((c('p')+c('l'))/at.length*100)+'%':'—'}</span></div><small style="margin-top:6px">آخر السجلات: ${at.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8).map(a=>a.date.slice(5)+' '+({p:'حاضر',a:'غائب',l:'متأخر'})[a.st]).join(' · ')||'—'}</small>
+  <h2>الامتحانات</h2>${ex.length?ex.map(e=>`<div class="r n"><div><b>${esc(e.title)}</b><small>${e.date}</small></div><span class="b">${e.scores&&e.scores[id]!=null?e.scores[id]+' / '+e.max:'—'}</span></div>`).join(''):'<div class="em">لا توجد امتحانات لهذا الصف</div>'}`)}
+// ---------- payments
+function payM(sid,y,m){const s=S.students[sid],p=pay(sid,y,m);
+  openM(`<h3>${esc(s.name)} — ${M[m]} ${y}</h3><label>المبلغ المدفوع (ج)<input id="p_a" type="number" min="0" value="${p?p.amt:feeOf(s)}"></label><label>تاريخ الدفع<input id="p_d" type="date" value="${p?p.date:TODAY}"></label><div class="bar"><button onclick="savePay('${sid}',${y},${m})">حفظ</button>${p?`<button class="d" onclick="unpay('${sid}',${y},${m})">إلغاء الدفع</button>`:''}<button class="s" onclick="cl();back()">إغلاق</button></div>`)}
+function back(){if(_back){const b=_back;_back=null;fileM(b)}}
+function savePay(sid,y,m){const a=+$('#p_a').value;if(!(a>=0)||$('#p_a').value===''){toast('اكتب المبلغ');return}
+  save('payments',`${sid}_${y}-${m}`,{sid,y,m,amt:a,date:$('#p_d').value||TODAY,ts:Date.now()});cl();render();back();toast('تم تسجيل الدفع')}
+function unpay(sid,y,m){cfm('إلغاء هذا الدفع؟',()=>{save('payments',`${sid}_${y}-${m}`,null);render();back();toast('تم الإلغاء')})}
+function feeM(){const f=(S.settings.main||{}).fee||{};
+  openM(`<h3>قيمة الاشتراك الشهري لكل صف (ج)</h3>${G.map((n,g)=>`<label>${n}<input id="fe${g}" type="number" min="0" value="${f[g]||''}"></label>`).join('')}<div class="bar"><button onclick="saveFee()">حفظ</button><button class="s" onclick="cl()">إلغاء</button></div>`)}
+function saveFee(){const f={};G.forEach((_,g)=>{f[g]=+$('#fe'+g).value||0});save('settings','main',{fee:f});cl();render();toast('تم حفظ الاشتراكات')}
+// ---------- attendance
+function mark(sid,st){const k=`${sid}_${aD}`,a=S.attendance[k],undo=a&&a.st==st;save('attendance',k,undo?null:{sid,date:aD,st});render();if(st=='a'&&!undo&&autoWa&&S.students[sid].phone)wa(sid,'abs')}
+function allP(){aList().forEach(s=>{const k=`${s.id}_${aD}`;if(!S.attendance[k])save('attendance',k,{sid:s.id,date:aD,st:'p'})});render()}
+// ---------- exams
+function exForm(){openM(`<h3>إضافة امتحان</h3><label>الصف<select id="e_g">${opts(G,gSel)}</select></label><label>اسم الامتحان<input id="e_t"></label><label>التاريخ<input id="e_d" type="date" value="${TODAY}"></label><label>الدرجة النهائية<input id="e_m" type="number" min="1" value="20"></label><div class="bar"><button onclick="saveEx()">حفظ</button><button class="s" onclick="cl()">إلغاء</button></div>`)}
+function saveEx(){const t=$('#e_t').value.trim(),m=+$('#e_m').value;if(!t||!(m>0)){toast('أكمل البيانات');return}
+  save('exams',uid(),{grade:+$('#e_g').value,title:t,date:$('#e_d').value||TODAY,max:m,scores:{}});cl();render();toast('تمت الإضافة')}
+function scM(id){const e=S.exams[id],l=byG(e.grade).sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+  openM(`<h3>${esc(e.title)}</h3><small>${G[e.grade]} · ${e.date} · من ${e.max}</small>${exStat(e)}${fileSec(id)}${l.length?l.map(s=>`<div class="r n"><b>${esc(s.name)}</b><input type="number" min="0" max="${e.max}" step="0.5" style="width:90px" data-s="${s.id}" value="${e.scores&&e.scores[s.id]!=null?e.scores[s.id]:''}"></div>`).join(''):'<div class="em">لا يوجد طلاب في هذا الصف</div>'}<div class="bar"><button onclick="saveSc('${id}')">حفظ الدرجات</button><button class="d" onclick="delEx('${id}')">حذف الامتحان</button><button class="s" onclick="cl()">إغلاق</button></div>`)}
+function saveSc(id){const e=S.exams[id],sc={};document.querySelectorAll('#mc input[data-s]').forEach(i=>{if(i.value!==''){const v=+i.value;if(v>=0&&v<=e.max)sc[i.dataset.s]=v}});save('exams',id,{...e,scores:sc});cl();render();toast('تم حفظ الدرجات')}
+function delEx(id){cfm('حذف هذا الامتحان بكل درجاته؟',()=>{rmFiles(S.exams[id].files);save('exams',id,null);render();toast('تم الحذف')})}
+boot();if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
